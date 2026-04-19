@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Corp.IdentityMgmt.Api/Corp.IdentityMgmt.Api.csproj" />
+  <Project Path="Corp.IdentityMgmt.Application/Corp.IdentityMgmt.Application.csproj" />
+  <Project Path="Corp.IdentityMgmt.Domain/Corp.IdentityMgmt.Domain.csproj" />
+  <Project Path="Corp.IdentityMgmt.Infrastructure/Corp.IdentityMgmt.Infrastructure.csproj" />
+</Solution>
