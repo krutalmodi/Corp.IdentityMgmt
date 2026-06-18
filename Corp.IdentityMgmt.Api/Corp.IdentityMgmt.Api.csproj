@@ -8,6 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Corp.IdentityMgmt.Application\Corp.IdentityMgmt.Application.csproj" />
+    <ProjectReference Include="..\Corp.IdentityMgmt.Infrastructure\Corp.IdentityMgmt.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

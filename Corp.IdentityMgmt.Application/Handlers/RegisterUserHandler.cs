@@ -4,7 +4,7 @@ using Corp.IdentityMgmt.Domain.Entities;
 
 namespace Corp.IdentityMgmt.Application.Handlers
 {
-    internal class RegisterUserHandler
+    public class RegisterUserHandler
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
@@ -17,16 +17,20 @@ namespace Corp.IdentityMgmt.Application.Handlers
 
         public async Task RegisterAsync(RegisterDto dto, Guid tenantId)
         {
+            // 1. Enforce uniqueness per tenant
             if (await _userRepository.GetUserByEmailAsync(tenantId, dto.Email) != null)
             {
                 throw new InvalidOperationException("Email already in use.");
             }
 
+            // 2. Create user
             var user = new UserIdentity(tenantId, dto.Email);
             await _userRepository.AddUserAsync(user);
 
+            // 3. Hash password
             var (hash, salt) = _passwordHasher.Hash(dto.Password);
 
+            // 4. Persist credentials
             await _userRepository.AddCredentialAsync(new Credential
             {
                 UserId = user.Id,

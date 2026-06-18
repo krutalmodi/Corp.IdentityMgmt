@@ -4,5 +4,5 @@ using System.Text;
 
 namespace Corp.IdentityMgmt.Application.DTOs
 {
-    internal record RegisterDto(string Email, string Password);
+    public record RegisterDto(string Email, string Password);
 }

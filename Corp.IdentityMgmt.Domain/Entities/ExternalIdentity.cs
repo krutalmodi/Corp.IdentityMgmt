@@ -7,6 +7,9 @@
         public string Provider { get; set; }
         public string ProviderUserId { get; set; }
         public string Email { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation property
+        public UserIdentity User { get; set; }
     }
 }

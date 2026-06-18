@@ -7,7 +7,6 @@ namespace Corp.IdentityMgmt.Application.Interfaces
         Task<UserIdentity?> GetUserByEmailAsync(Guid tenantId, string email);
         Task<UserIdentity?> GetUserByIdAsync(Guid userId);
         Task AddUserAsync(UserIdentity user);
-        Task UpdateUserAsync(UserIdentity user);
         
         Task AddCredentialAsync(Credential credential);
         Task<Credential?> GetCredentialByUserIdAsync(Guid userId);
