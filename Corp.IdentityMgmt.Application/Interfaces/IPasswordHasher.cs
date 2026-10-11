@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Corp.IdentityMgmt.Application.Interfaces
+namespace InsurancePortal.IdentityService.Application.Interfaces
 {
     public interface IPasswordHasher
     {

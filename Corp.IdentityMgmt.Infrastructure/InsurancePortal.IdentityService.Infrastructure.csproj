@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Corp.IdentityMgmt.Application\Corp.IdentityMgmt.Application.csproj" />
+    <ProjectReference Include="..\Corp.IdentityMgmt.Application\InsurancePortal.IdentityService.Application.csproj" />
   </ItemGroup>
 
 </Project>

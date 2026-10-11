@@ -1,8 +1,8 @@
-﻿using Corp.IdentityMgmt.Application.DTOs;
-using Corp.IdentityMgmt.Application.Interfaces;
-using Corp.IdentityMgmt.Domain.Entities;
+﻿using InsurancePortal.IdentityService.Application.DTOs;
+using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Domain.Entities;
 
-namespace Corp.IdentityMgmt.Application.Handlers
+namespace InsurancePortal.IdentityService.Application.Handlers
 {
     public class RegisterUserHandler
     {

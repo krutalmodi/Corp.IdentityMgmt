@@ -1,11 +1,11 @@
-﻿using Corp.IdentityMgmt.Application.Dtos;
-using Corp.IdentityMgmt.Application.DTOs;
-using Corp.IdentityMgmt.Application.Handlers;
-using Corp.IdentityMgmt.Application.Interfaces;
-using Corp.IdentityMgmt.Infrastructure.ExternalProviders;
+﻿using InsurancePortal.IdentityService.Application.Dtos;
+using InsurancePortal.IdentityService.Application.DTOs;
+using InsurancePortal.IdentityService.Application.Handlers;
+using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Infrastructure.ExternalProviders;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Corp.IdentityMgmt.Api.Controllers
+namespace InsurancePortal.IdentityService.Api.Controllers
 {
     [Route("api/auth")]
     [ApiController]

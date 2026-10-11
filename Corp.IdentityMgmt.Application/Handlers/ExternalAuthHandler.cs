@@ -1,8 +1,8 @@
-using Corp.IdentityMgmt.Application.Dtos;
-using Corp.IdentityMgmt.Application.Interfaces;
-using Corp.IdentityMgmt.Domain.Entities;
+using InsurancePortal.IdentityService.Application.Dtos;
+using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Domain.Entities;
 
-namespace Corp.IdentityMgmt.Application.Handlers
+namespace InsurancePortal.IdentityService.Application.Handlers
 {
     /// <summary>
     /// Handles external OAuth authentication flows including user linking and JWT token generation.

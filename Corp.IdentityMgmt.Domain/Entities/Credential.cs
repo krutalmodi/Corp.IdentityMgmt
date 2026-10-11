@@ -1,4 +1,4 @@
-﻿namespace Corp.IdentityMgmt.Domain.Entities
+﻿namespace InsurancePortal.IdentityService.Domain.Entities
 {
     public class Credential
     {

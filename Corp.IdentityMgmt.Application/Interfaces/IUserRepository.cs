@@ -1,6 +1,6 @@
-﻿using Corp.IdentityMgmt.Domain.Entities;
+﻿using InsurancePortal.IdentityService.Domain.Entities;
 
-namespace Corp.IdentityMgmt.Application.Interfaces
+namespace InsurancePortal.IdentityService.Application.Interfaces
 {
     public interface IUserRepository
     {

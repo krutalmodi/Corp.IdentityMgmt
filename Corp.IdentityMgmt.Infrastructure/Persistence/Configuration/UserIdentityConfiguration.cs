@@ -1,8 +1,8 @@
-using Corp.IdentityMgmt.Domain.Entities;
+using InsurancePortal.IdentityService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Corp.IdentityMgmt.Infrastructure.Persistence.Configuration
+namespace InsurancePortal.IdentityService.Infrastructure.Persistence.Configuration
 {
     public class UserIdentityConfiguration : IEntityTypeConfiguration<UserIdentity>
     {

@@ -1,4 +1,4 @@
-namespace Corp.IdentityMgmt.Application.Dtos
+namespace InsurancePortal.IdentityService.Application.Dtos
 {
     /// <summary>
     /// Represents a request to initiate an external login flow.

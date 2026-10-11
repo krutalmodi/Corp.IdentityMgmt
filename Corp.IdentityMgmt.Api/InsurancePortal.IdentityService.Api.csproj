@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Corp.IdentityMgmt.Application\Corp.IdentityMgmt.Application.csproj" />
-    <ProjectReference Include="..\Corp.IdentityMgmt.Infrastructure\Corp.IdentityMgmt.Infrastructure.csproj" />
+    <ProjectReference Include="..\Corp.IdentityMgmt.Application\InsurancePortal.IdentityService.Application.csproj" />
+    <ProjectReference Include="..\Corp.IdentityMgmt.Infrastructure\InsurancePortal.IdentityService.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

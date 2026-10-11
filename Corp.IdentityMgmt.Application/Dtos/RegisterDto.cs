@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Corp.IdentityMgmt.Application.DTOs
+namespace InsurancePortal.IdentityService.Application.DTOs
 {
     public record RegisterDto(string Email, string Password);
 }

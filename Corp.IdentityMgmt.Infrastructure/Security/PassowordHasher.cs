@@ -1,8 +1,8 @@
-﻿using Corp.IdentityMgmt.Application.Interfaces;
+﻿using InsurancePortal.IdentityService.Application.Interfaces;
 using System;
 using System.Security.Cryptography;
 
-namespace Corp.IdentityMgmt.Infrastructure.Security
+namespace InsurancePortal.IdentityService.Infrastructure.Security
 {
     public class PassowordHasher : IPasswordHasher
     {

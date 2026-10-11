@@ -1,4 +1,4 @@
-﻿namespace Corp.IdentityMgmt.Application.Interfaces
+﻿namespace InsurancePortal.IdentityService.Application.Interfaces
 {
     internal interface IExternalAuthProvider
     {

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Corp.IdentityMgmt.Api/InsurancePortal.IdentityService.Api.csproj" />
+  <Project Path="Corp.IdentityMgmt.Application/InsurancePortal.IdentityService.Application.csproj" />
+  <Project Path="Corp.IdentityMgmt.Domain/InsurancePortal.IdentityService.Domain.csproj" />
+  <Project Path="Corp.IdentityMgmt.Infrastructure/InsurancePortal.IdentityService.Infrastructure.csproj" />
+</Solution>

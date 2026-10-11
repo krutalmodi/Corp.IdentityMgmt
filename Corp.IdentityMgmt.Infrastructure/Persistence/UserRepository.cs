@@ -1,11 +1,8 @@
-﻿using Corp.IdentityMgmt.Application.Interfaces;
-using Corp.IdentityMgmt.Domain.Entities;
+﻿using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Corp.IdentityMgmt.Infrastructure.Persistence
+namespace InsurancePortal.IdentityService.Infrastructure.Persistence
 {
     public class UserRepository : IUserRepository
     {

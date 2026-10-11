@@ -1,8 +1,8 @@
-﻿using Corp.IdentityMgmt.Domain.Entities;
-using Corp.IdentityMgmt.Infrastructure.Persistence.Configuration;
+﻿using InsurancePortal.IdentityService.Domain.Entities;
+using InsurancePortal.IdentityService.Infrastructure.Persistence.Configuration;
 using Microsoft.EntityFrameworkCore;
 
-namespace Corp.IdentityMgmt.Infrastructure.Persistence
+namespace InsurancePortal.IdentityService.Infrastructure.Persistence
 {
     public class IdentityDbContext : DbContext
     {

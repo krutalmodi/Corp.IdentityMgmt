@@ -1,5 +1,5 @@
-﻿using Corp.IdentityMgmt.Application.Interfaces;
-using Corp.IdentityMgmt.Domain.Entities;
+﻿using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Text;
 
 
-namespace Corp.IdentityMgmt.Infrastructure.Security
+namespace InsurancePortal.IdentityService.Infrastructure.Security
 {
     public class JwtTokenService : ITokenService
     {

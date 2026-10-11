@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Corp.IdentityMgmt.Domain\Corp.IdentityMgmt.Domain.csproj" />
+    <ProjectReference Include="..\Corp.IdentityMgmt.Domain\InsurancePortal.IdentityService.Domain.csproj" />
   </ItemGroup>
 
 </Project>

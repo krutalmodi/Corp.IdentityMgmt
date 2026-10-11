@@ -1,7 +1,7 @@
-using Corp.IdentityMgmt.Application.Interfaces;
-using Corp.IdentityMgmt.Infrastructure.Persistence;
-using Corp.IdentityMgmt.Infrastructure.Security;
-using Corp.IdentityMgmt.Infrastructure.ExternalProviders;
+using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Infrastructure.Persistence;
+using InsurancePortal.IdentityService.Infrastructure.Security;
+using InsurancePortal.IdentityService.Infrastructure.ExternalProviders;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,6 +66,29 @@ builder.Services.AddScoped<IPasswordHasher, PassowordHasher>();
 
 #endregion
 
+#region CORS Configuration
+
+// Add CORS policy to allow frontend to communicate with API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:3000",      // React development server
+                "http://localhost:5000",      // Alternate frontend port
+                "https://localhost:3001",     // Secure frontend development
+                "https://localhost:44388"     // Your API URL
+            )
+            .AllowAnyMethod()                // Allow GET, POST, PUT, DELETE, etc.
+            .AllowAnyHeader()                // Allow any headers (Content-Type, Authorization, etc.)
+            .AllowCredentials()              // Allow cookies and authorization headers
+            .WithExposedHeaders("Content-Type", "Authorization");
+    });
+});
+
+#endregion
+
 var app = builder.Build();
 
 // 2. ENABLE SWAGGER MIDDLEWARE (Best practice: Restrict to Development environment)
@@ -74,6 +97,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();   // Serves the generated OpenAPI spec as a JSON endpoint
     app.UseSwaggerUI(); // Serves the interactive web UI
 }
+
+// 3. ENABLE CORS MIDDLEWARE (Must be before UseAuthorization)
+app.UseCors("AllowFrontend");
 
 #region Database Initialization
 

@@ -1,10 +1,10 @@
-﻿using Corp.IdentityMgmt.Application.DTOs;
-using Corp.IdentityMgmt.Application.Interfaces;
+﻿using InsurancePortal.IdentityService.Application.DTOs;
+using InsurancePortal.IdentityService.Application.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Corp.IdentityMgmt.Application.Handlers
+namespace InsurancePortal.IdentityService.Application.Handlers
 {
     public class LoginHandler
     {

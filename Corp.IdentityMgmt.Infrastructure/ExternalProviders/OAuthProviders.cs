@@ -1,7 +1,7 @@
-using Corp.IdentityMgmt.Application.Dtos;
+using InsurancePortal.IdentityService.Application.Dtos;
 using System.Text.Json;
 
-namespace Corp.IdentityMgmt.Infrastructure.ExternalProviders
+namespace InsurancePortal.IdentityService.Infrastructure.ExternalProviders
 {
     /// <summary>
     /// Abstract base class for OAuth providers.
@@ -180,7 +180,7 @@ namespace Corp.IdentityMgmt.Infrastructure.ExternalProviders
                 // Get user info
                 var userInfoRequest = new HttpRequestMessage(HttpMethod.Get, UserInfoEndpoint);
                 userInfoRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-                userInfoRequest.Headers.Add("User-Agent", "Corp.IdentityMgmt");
+                userInfoRequest.Headers.Add("User-Agent", "InsurancePortal.IdentityService");
 
                 var userResponse = await _httpClient.SendAsync(userInfoRequest);
                 if (!userResponse.IsSuccessStatusCode)
@@ -220,7 +220,7 @@ namespace Corp.IdentityMgmt.Infrastructure.ExternalProviders
             {
                 var emailRequest = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user/emails");
                 emailRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-                emailRequest.Headers.Add("User-Agent", "Corp.IdentityMgmt");
+                emailRequest.Headers.Add("User-Agent", "InsurancePortal.IdentityService");
 
                 var response = await _httpClient.SendAsync(emailRequest);
                 if (!response.IsSuccessStatusCode)
