@@ -3,4 +3,5 @@
   <Project Path="InsurancePortal.IdentityService.Application/InsurancePortal.IdentityService.Application.csproj" />
   <Project Path="InsurancePortal.IdentityService.Domain/InsurancePortal.IdentityService.Domain.csproj" />
   <Project Path="InsurancePortal.IdentityService.Infrastructure/InsurancePortal.IdentityService.Infrastructure.csproj" />
+  <Project Path="InsurancePortal.IdentityService.UnitTest/InsurancePortal.IdentityService.UnitTest.csproj" />
 </Solution>

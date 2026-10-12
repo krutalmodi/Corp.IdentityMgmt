@@ -3,11 +3,13 @@ using InsurancePortal.IdentityService.Infrastructure.Persistence;
 using InsurancePortal.IdentityService.Infrastructure.Security;
 using InsurancePortal.IdentityService.Infrastructure.ExternalProviders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -55,6 +57,46 @@ if (!string.IsNullOrEmpty(microsoftClientId) && !string.IsNullOrEmpty(microsoftC
     builder.Services.AddScoped<MicrosoftOAuthProvider>(sp =>
         new MicrosoftOAuthProvider(sp.GetRequiredService<HttpClient>(), microsoftClientId, microsoftClientSecret));
 }
+
+#endregion
+
+#region Authentication Configuration
+
+// Configure JWT Bearer authentication
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"];
+var issuer = jwtSettings["Issuer"];
+var audience = jwtSettings["Audience"];
+
+// SecretKey is required for JWT validation
+if (string.IsNullOrEmpty(secretKey))
+{
+    throw new InvalidOperationException(
+        "JwtSettings:SecretKey is required and must be configured in appsettings.json. " +
+        "The secret key must be at least 32 characters long.");
+}
+
+// Always register authentication handler (required for [Authorize] attribute to work)
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            ValidateIssuer = !string.IsNullOrEmpty(issuer),
+            ValidIssuer = issuer,
+            ValidateAudience = !string.IsNullOrEmpty(audience),
+            ValidAudience = audience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 #endregion
 
@@ -128,6 +170,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

@@ -51,9 +51,13 @@ namespace InsurancePortal.IdentityService.Api.Controllers
                 Guid tenantId = ResolveTenantId();
                 var handler = new RegisterUserHandler(_userRepository, _passwordHasher);
                 await handler.RegisterAsync(dto, tenantId);
-                return Ok(new { message = "User registered successfully." });
+                return Ok(new RegisterResponseDto("User registered successfully."));
             }
             catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (ArgumentException ex)
             {
                 return BadRequest(new { error = ex.Message });
             }

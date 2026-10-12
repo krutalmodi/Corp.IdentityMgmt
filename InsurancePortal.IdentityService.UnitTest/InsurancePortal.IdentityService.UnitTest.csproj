@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\AuthControllerExternalLoginCallbackTests.cs" />
+    <Compile Remove="Controllers\AuthControllerGetExternalProvidersTests.cs" />
+    <Compile Remove="Controllers\AuthControllerInitiateExternalLoginTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.8.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InsurancePortal.IdentityService.Api\InsurancePortal.IdentityService.Api.csproj" />
+    <ProjectReference Include="..\InsurancePortal.IdentityService.Application\InsurancePortal.IdentityService.Application.csproj" />
+    <ProjectReference Include="..\InsurancePortal.IdentityService.Domain\InsurancePortal.IdentityService.Domain.csproj" />
+    <ProjectReference Include="..\InsurancePortal.IdentityService.Infrastructure\InsurancePortal.IdentityService.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

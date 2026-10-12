@@ -26,12 +26,12 @@ namespace InsurancePortal.IdentityService.Infrastructure.Security
                 new Claim("tenant", user.TenantId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email)
             };
-            int expirationHour = int.TryParse(_configuration["Jwt:ExpireMinutes"], out var hours) ? hours : 1;
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]!));
+            int expirationHour = int.TryParse(_configuration["JwtSettings:ExpirationMinutes"], out var hours) ? hours : 1;
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]!));
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
+                issuer: _configuration["JwtSettings:Issuer"],
+                audience: _configuration["JwtSettings:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(expirationHour),
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
