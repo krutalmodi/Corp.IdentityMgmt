@@ -1,18 +1,19 @@
 using InsurancePortal.IdentityService.Application.Dtos;
 using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Domain.Authorization;
 using InsurancePortal.IdentityService.Domain.Entities;
 
-namespace InsurancePortal.IdentityService.Application.Handlers
+namespace InsurancePortal.IdentityService.Application.Commands
 {
     /// <summary>
     /// Handles external OAuth authentication flows including user linking and JWT token generation.
     /// </summary>
-    public class ExternalAuthHandler
+    public class ExternalAuthCommand
     {
         private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
 
-        public ExternalAuthHandler(IUserRepository userRepository, ITokenService tokenService)
+        public ExternalAuthCommand(IUserRepository userRepository, ITokenService tokenService)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
@@ -23,7 +24,7 @@ namespace InsurancePortal.IdentityService.Application.Handlers
         /// Handles user linking, auto-registration, and token generation.
         /// </summary>
         public async Task<ExternalLoginResponseDto> HandleExternalLoginAsync(
-            ExternalUserInfoDto externalUser, 
+            ExternalUserInfoDto externalUser,
             Guid tenantId,
             string provider)
         {
@@ -87,6 +88,7 @@ namespace InsurancePortal.IdentityService.Application.Handlers
                     {
                         EmailConfirmed = true // External providers verify email
                     };
+                    newUser.AssignRole(await _userRepository.GetRoleByNameAsync(Roles.Registered));
 
                     await _userRepository.AddUserAsync(newUser);
 

@@ -10,4 +10,8 @@
     <ProjectReference Include="..\InsurancePortal.IdentityService.Domain\InsurancePortal.IdentityService.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Handlers\" />
+  </ItemGroup>
+
 </Project>

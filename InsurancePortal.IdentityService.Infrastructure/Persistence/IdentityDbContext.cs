@@ -11,6 +11,10 @@ namespace InsurancePortal.IdentityService.Infrastructure.Persistence
         public DbSet<UserIdentity> User => Set<UserIdentity>();
         public DbSet<Credential> Credential => Set<Credential>();
         public DbSet<ExternalIdentity> ExternalIdentity => Set<ExternalIdentity>();
+        public DbSet<UserRole> UserRole => Set<UserRole>();
+        public DbSet<Role> Role => Set<Role>();
+        public DbSet<Permission> Permission => Set<Permission>();
+        public DbSet<RolePermission> RolePermission => Set<RolePermission>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -20,6 +24,10 @@ namespace InsurancePortal.IdentityService.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new UserIdentityConfiguration());
             modelBuilder.ApplyConfiguration(new CredentialConfiguration());
             modelBuilder.ApplyConfiguration(new ExternalIdentityConfiguration());
+            modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new PermissionConfiguration());
+            modelBuilder.ApplyConfiguration(new RolePermissionConfiguration());
         }
     }
 }

@@ -1,3 +1,4 @@
+using InsurancePortal.IdentityService.Api.Security;
 using InsurancePortal.IdentityService.Application.Interfaces;
 using InsurancePortal.IdentityService.Infrastructure.Persistence;
 using InsurancePortal.IdentityService.Infrastructure.Security;
@@ -105,6 +106,9 @@ builder.Services
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, PassowordHasher>();
+builder.Services.AddScoped<IUserQueries, UserQueries>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserContext, HttpCurrentUserContext>();
 
 #endregion
 

@@ -573,6 +573,254 @@ public IActionResult AdminOnlyAction()
 
 ---
 
+## Roles & Permissions Design
+
+This section defines the authorization model for the InsurancePortal platform. It covers the business services (User, Quote, Payment, Policy, Claims, Dashboard), the roles that consume them, and how permissions are scoped. It is a design specification; no code is implemented here.
+
+### Design Principles
+
+- **Deny by default**: any action not explicitly granted to a role is denied.
+- **Permissions over roles**: roles are bundles of permissions. Endpoints check permissions, not role names.
+- **Least privilege**: each role receives only the permissions required for its business function.
+- **Scoped access**: permissions are paired with a scope (`Own`, `Assigned`, `Organization`, `Tenant`, `Any`) so that a user can only act on data they are entitled to see.
+- **Separation of internal and external users**: insurer staff (Admin, Associates, Agents) and external parties (Providers) are isolated by organization membership and tenant.
+
+### Permission Naming Convention
+
+Format: `<service>.<resource>.<action>[.<scope>]`
+
+- Services: `user`, `quote`, `payment`, `policy`, `claim`, `dashboard`
+- Actions: `read`, `create`, `update`, `delete`, `approve`, `issue`, `cancel`, `refund`, `settle`, `assign`, `submit`
+- Scope suffix is optional. Omitted scope means the action is only valid for the scope defined in the matrix.
+
+Permissions are stored in the `Permission` table and linked to roles through `RolePermission`. The JWT carries the effective permission set for the authenticated user as `permission` claims, in addition to the `role` claim.
+
+### Scopes
+
+| Scope | Meaning | Example |
+|-------|---------|---------|
+| `Own` | Records where `UserId` equals the caller | Registered user viewing own policy |
+| `Assigned` | Records assigned to the caller (agent-owned customers, claims assigned to an associate) | Agent editing a quote for an assigned customer |
+| `Organization` | Records belonging to the caller's provider or agency organization | Provider Staff viewing claims for their clinic |
+| `Tenant` | Any record within the caller's tenant (`TenantId`) | Associate reviewing policies in the tenant |
+| `Any` | Platform-wide, no tenant restriction | Admin managing all tenants |
+
+### Services and Permissions
+
+#### 1. User Services
+
+| Permission | Description |
+|------------|-------------|
+| `user.profile.read.own` | View own profile |
+| `user.profile.update.own` | Update own profile and change own password |
+| `user.convert.own` | Convert own Guest account to Registered, completing required attributes |
+| `user.read.tenant` | View users within tenant |
+| `user.read.any` | View any user across tenants |
+| `user.create.tenant` | Create users within tenant |
+| `user.disable.tenant` | Disable or enable users within tenant |
+| `user.role.assign.tenant` | Assign roles to users within tenant |
+| `user.role.assign.any` | Assign any role, including Admin, across tenants |
+| `user.org.manage.organization` | Manage staff membership of own provider organization |
+
+#### 2. Quote Service
+
+| Permission | Description |
+|------------|-------------|
+| `quote.create.guest` | Create a quote as a Guest. Saved with partial attributes and linked to the Guest account |
+| `quote.read.own` | View own quotes |
+| `quote.create.own` | Create a quote for self |
+| `quote.update.own` | Update own quote while in draft |
+| `quote.create.assigned` | Create a quote on behalf of an assigned customer |
+| `quote.update.assigned` | Update quote for an assigned customer |
+| `quote.read.assigned` | View quotes for assigned customers |
+| `quote.read.tenant` | View all quotes within tenant |
+| `quote.approve.tenant` | Approve or reject quotes for underwriting |
+| `quote.delete.tenant` | Withdraw or delete quotes within tenant |
+
+#### 3. Payment Service
+
+| Permission | Description |
+|------------|-------------|
+| `payment.read.own` | View own payment history and invoices |
+| `payment.create.own` | Pay own premium or invoice |
+| `payment.read.assigned` | View payments for assigned customers |
+| `payment.read.tenant` | View all payments within tenant |
+| `payment.refund.tenant` | Issue refunds within tenant |
+| `payment.reconcile.tenant` | Reconcile and export payment ledgers within tenant |
+| `payment.read.organization` | View payments related to provider services (claim settlements, provider payouts) |
+
+#### 4. Policy Service
+
+| Permission | Description |
+|------------|-------------|
+| `policy.read.own` | View own policies and documents |
+| `policy.issue.assigned` | Issue policy from an approved quote for an assigned customer |
+| `policy.read.assigned` | View policies for assigned customers |
+| `policy.update.assigned` | Endorse or modify policies for assigned customers |
+| `policy.renew.assigned` | Renew policies for assigned customers |
+| `policy.cancel.tenant` | Cancel policies within tenant |
+| `policy.read.tenant` | View all policies within tenant |
+| `policy.issue.tenant` | Issue policies within tenant |
+
+#### 5. Claims Service
+
+| Permission | Description |
+|------------|-------------|
+| `claim.submit.own` | Submit a claim against own policy |
+| `claim.read.own` | View own claims and status |
+| `claim.document.upload.own` | Upload supporting documents to own claim |
+| `claim.read.assigned` | View claims assigned to the caller |
+| `claim.read.tenant` | View all claims within tenant |
+| `claim.review.tenant` | Review and assess claims within tenant |
+| `claim.approve.tenant` | Approve or deny claims within tenant |
+| `claim.settle.tenant` | Trigger settlement payment for approved claims |
+| `claim.assign.tenant` | Assign claims to associates |
+| `claim.read.organization` | View claims submitted to own provider organization |
+| `claim.submit.organization` | Submit provider invoices or treatment/repair details for a claim |
+| `claim.status.update.organization` | Update provider-side status (received, in progress, completed) |
+
+#### 6. Dashboard Service
+
+| Permission | Description |
+|------------|-------------|
+| `dashboard.personal.view.own` | View personal dashboard (policies, open claims, upcoming payments) |
+| `dashboard.agent.view.assigned` | View agent dashboard (pipeline, commissions, customer policies) |
+| `dashboard.operations.view.tenant` | View operational dashboard (claims queue, quote backlog, payments) |
+| `dashboard.provider.view.organization` | View provider dashboard (claims received, settlement status) |
+| `dashboard.admin.view.any` | View platform dashboard (users, tenants, system health, audit) |
+
+### Role Definitions
+
+| Role | Type | Scope Baseline | Purpose |
+|------|------|----------------|---------|
+| `Guest` | External, lightweight account | `Own` (limited) | Browse products, create and manage own quotes, and convert to Registered |
+| `Registered` | External, customer | `Own` | Manage own profile, quotes, policies, payments, and claims |
+| `Admin` | Internal, platform | `Any` | Manage tenants, users, roles, and platform configuration |
+| `Associates` | Internal, insurer staff | `Tenant` | Underwrite quotes, issue policies, process and approve claims |
+| `Agents` | Internal, sales | `Assigned` | Sell and service policies for assigned customers |
+| `Providers Admin` | External, provider | `Organization` | Manage provider organization, staff, and claim responses |
+| `Providers Staff` | External, provider | `Organization` (limited) | Process claims and update status for the provider organization |
+
+### Role-to-Permission Matrix
+
+Legend: `✔` granted, `—` not granted. Scope in brackets where it differs from the permission default.
+
+| Permission | Guest | Registered | Agents | Associates | Providers Staff | Providers Admin | Admin |
+|------------|:-----:|:----------:|:------:|:----------:|:---------------:|:---------------:|:-----:|
+| `user.profile.read.own` | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| `user.profile.update.own` | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| `user.convert.own` | ✔ | — | — | — | — | — | — |
+| `user.read.tenant` | — | — | — | ✔ | — | — | ✔ |
+| `user.read.any` | — | — | — | — | — | — | ✔ |
+| `user.create.tenant` | — | — | — | — | — | — | ✔ |
+| `user.disable.tenant` | — | — | — | — | — | — | ✔ |
+| `user.role.assign.tenant` | — | — | — | — | — | — | ✔ |
+| `user.role.assign.any` | — | — | — | — | — | — | ✔ |
+| `user.org.manage.organization` | — | — | — | — | — | ✔ | — |
+| `quote.create.guest` | ✔ | — | — | — | — | — | — |
+| `quote.read.own` | ✔ | ✔ | — | — | — | — | — |
+| `quote.create.own` | — | ✔ | — | — | — | — | — |
+| `quote.update.own` | ✔ | ✔ | — | — | — | — | — |
+| `quote.create.assigned` | — | — | ✔ | — | — | — | — |
+| `quote.update.assigned` | — | — | ✔ | — | — | — | — |
+| `quote.read.assigned` | — | — | ✔ | — | — | — | — |
+| `quote.read.tenant` | — | — | — | ✔ | — | — | ✔ |
+| `quote.approve.tenant` | — | — | — | ✔ | — | — | — |
+| `quote.delete.tenant` | — | — | — | ✔ | — | — | ✔ |
+| `payment.read.own` | — | ✔ | — | — | — | — | — |
+| `payment.create.own` | — | ✔ | — | — | — | — | — |
+| `payment.read.assigned` | — | — | ✔ | — | — | — | — |
+| `payment.read.tenant` | — | — | — | ✔ | — | — | ✔ |
+| `payment.refund.tenant` | — | — | — | ✔ | — | — | — |
+| `payment.reconcile.tenant` | — | — | — | — | — | — | ✔ |
+| `payment.read.organization` | — | — | — | — | ✔ | ✔ | — |
+| `policy.read.own` | — | ✔ | — | — | — | — | — |
+| `policy.issue.assigned` | — | — | ✔ | — | — | — | — |
+| `policy.read.assigned` | — | — | ✔ | — | — | — | — |
+| `policy.update.assigned` | — | — | ✔ | — | — | — | — |
+| `policy.renew.assigned` | — | — | ✔ | — | — | — | — |
+| `policy.read.tenant` | — | — | — | ✔ | — | — | ✔ |
+| `policy.issue.tenant` | — | — | — | ✔ | — | — | — |
+| `policy.cancel.tenant` | — | — | — | ✔ | — | — | ✔ |
+| `claim.submit.own` | — | ✔ | — | — | — | — | — |
+| `claim.read.own` | — | ✔ | — | — | — | — | — |
+| `claim.document.upload.own` | — | ✔ | — | — | — | — | — |
+| `claim.read.assigned` | — | — | — | ✔ | — | — | — |
+| `claim.read.tenant` | — | — | — | ✔ | — | — | ✔ |
+| `claim.review.tenant` | — | — | — | ✔ | — | — | — |
+| `claim.approve.tenant` | — | — | — | ✔ | — | — | — |
+| `claim.settle.tenant` | — | — | — | ✔ | — | — | — |
+| `claim.assign.tenant` | — | — | — | ✔ | — | — | ✔ |
+| `claim.read.organization` | — | — | — | — | ✔ | ✔ | — |
+| `claim.submit.organization` | — | — | — | — | ✔ | ✔ | — |
+| `claim.status.update.organization` | — | — | — | — | ✔ | ✔ | — |
+| `dashboard.personal.view.own` | — | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| `dashboard.agent.view.assigned` | — | — | ✔ | — | — | — | ✔ |
+| `dashboard.operations.view.tenant` | — | — | — | ✔ | — | — | ✔ |
+| `dashboard.provider.view.organization` | — | — | — | — | ✔ | ✔ | — |
+| `dashboard.admin.view.any` | — | — | — | — | — | — | ✔ |
+
+### Role Notes
+
+- **Guest**: a lightweight persisted account created on first quote. Quotes are saved with partial attributes and remain linked to the same `UserId` after conversion. Guests cannot purchase, pay, or file claims until converted to Registered.
+- **Registered**: self-service role. Newly registered users receive this role by default. Accounts are always scoped to `Own` records.
+- **Admin**: platform administrators. Manages users and roles, and has read visibility across tenants. Business actions (underwriting, claim approval, refunds) are intentionally not granted to Admin to preserve segregation of duties. Admin can be granted these only through a documented break-glass process.
+- **Associates**: insurer back-office staff. Tenant-scoped. Cannot approve their own submitted quotes or claims (four-eyes principle, enforced in the application layer).
+- **Agents**: sales producers. Access is limited to customers assigned to the agent. Agents cannot approve quotes or settle claims.
+- **Providers Admin**: owner or manager of a provider organization (hospital, repair shop, clinic, etc.). Can manage staff membership within the organization.
+- **Providers Staff**: day-to-day operators for a provider organization. Can respond to claims and update status but cannot submit or change financial settlement data, and cannot manage other users.
+
+### Organization and Tenancy Model
+
+- Every internal user belongs to exactly one `TenantId`. Associates, Agents, and Admin inherit tenant membership.
+- Provider users belong to exactly one `OrganizationId` (provider entity) within a tenant. Providers Admin and Providers Staff are scoped to that organization only.
+- A user may hold multiple roles, but the effective permission set is the union of those roles, filtered by their scope. Conflicting cross-role grants (for example, Associate and Provider Staff) are not allowed for the same identity; separate identities are required.
+
+### Guest Lifecycle and Conversion
+
+- **Creation**: a Guest account is created when a quote is first saved. The `UserIdentity` record is flagged as Guest and has nullable profile attributes (name, date of birth, contact details) that are required only for conversion.
+- **Conversion**: `user.convert.own` lets the Guest complete required attributes and set credentials. The same `UserId` is kept, so existing quotes are preserved. The role is changed from `Guest` to `Registered` and a new permission set is issued on the next token.
+- **Duplicate handling**: if the email already belongs to a Registered account, conversion is refused and the user is directed to log in and merge quotes.
+- **Tenancy**: Guests are assigned to a default tenant until an agent or associate reassigns them.
+
+### User Context
+
+A single `CurrentUserContext` represents the authenticated caller for each request. It is built once from the validated JWT and is read-only for the rest of the request.
+
+| Property | Source | Purpose |
+|----------|--------|---------|
+| `UserId` | `sub` claim | Owner matching for `Own` scope |
+| `Email` | `email` claim | Display, notifications, and Guest-to-Registered duplicate checks |
+| `Username` | `preferred_username` claim | Display and login identification |
+| `FirstName` | `given_name` claim | Display and personalization |
+| `LastName` | `family_name` claim | Display and personalization |
+| `TenantId` | `tenant_id` claim | Tenant scope checks |
+| `OrganizationId` | `org_id` claim (providers only) | Organization scope checks |
+| `Roles` | `role` claims | Display and coarse checks |
+| `Permissions` | `permission` claims | Authoritative capability checks |
+| `IsGuest` | Account flag | Restricts Guest actions until conversion |
+| `AccountStatus` | Account state | Blocks disabled or locked accounts |
+
+- Exposed to the Application layer through an interface (for example, `ICurrentUserContext`) implemented in Infrastructure.
+- Services never read raw claims directly; they use `CurrentUserContext` so authorization logic is consistent.
+- Anonymous requests produce an empty context with no permissions.
+
+### Enforcement Approach (Design Only)
+
+- Authorization policies are named after permissions (for example, `quote.read.tenant`) so that endpoints declare the exact capability they need.
+- Scope is evaluated against the resource's `OwnerUserId`, `AssignedUserId`, `OrganizationId`, or `TenantId`, as applicable.
+- Permission changes take effect on the next token issuance. Revocation of high-risk permissions (`user.role.assign.any`, `payment.refund.tenant`, `claim.settle.tenant`) requires short token lifetimes or a token revocation list.
+- Every grant and denial of a sensitive permission is written to an audit log.
+
+### Open Decisions
+
+- [ ] Confirm retention period for Guest accounts that never convert.
+- [ ] Confirm whether Agents may view commission data within the `dashboard.agent.view.assigned` scope.
+- [ ] Confirm whether Providers Staff may view patient or insured personal data beyond claim details.
+- [ ] Confirm the break-glass process for granting Admin business permissions.
+
+---
+
 ## Key Design Patterns & Principles
 
 ### 1. **Dependency Injection (DI)**
@@ -605,9 +853,45 @@ public IActionResult AdminOnlyAction()
 - Ensures data isolation between tenants
 - Visible in `GetUserByEmailAsync(Guid tenantId, string email)`
 
+### 6. **CQRS (Command Query Responsibility Segregation)**
+- Commands change state; queries read state and never mutate it
+- Separate models per side: command handlers use the domain aggregate (`UserIdentity`) and its behavior methods; query handlers return read-only DTOs projected directly from EF Core with `AsNoTracking()`
+- Implemented commands (`Application/Commands/`): `RegisterUserCommand`, `LoginCommand`, `ConvertGuestCommand`, `ExternalAuthCommand` (external login, account linking, and unlinking)
+- Implemented queries (`Application/Queries/`): `GetCurrentUserQuery` (returns `CurrentUserProfileDto`), `GetUserRolesQuery` (returns role names)
+- Planned, not yet implemented: `AssignRoleCommand`, `GetUserProfileQuery`
+- Each command and query is a dedicated class with a single public operation; the former `Application/Handlers/` types have been removed
+- Read operations use the dedicated query interface `IUserQueries` (implemented by `Infrastructure/Persistence/UserQueries.cs`), separate from the write-side `IUserRepository`, so read paths can be optimized or pointed at a read replica later without touching command logic
+- Read endpoints exposed by `AuthController`: `GET api/auth/me` (current user profile) and `GET api/auth/me/roles` (current user's roles); both require Bearer authentication and scope to the current user ID
+- Commands return only success/identifier or a newly issued token; they do not return full entity graphs
+- Validation and authorization for commands run before handler execution; queries rely on `ICurrentUserContext` for scoping
+- Persistence stays in a single SQL Server database for now; separate read stores are a future option, not a current requirement
+
 ---
 
 ## Data Model
+
+### Authorization Tables
+
+Roles and permissions are stored as first-class tables. Role and permission definitions are reference data; user-to-role assignments are transactional data.
+
+| Table | Purpose | Key Columns |
+|-------|---------|-------------|
+| `Role` | Catalog of roles | `Id` (PK, int IDENTITY), `Name` (unique, e.g. `Registered`), `Type` (External/Internal/Provider), `Description`, `IsActive` |
+| `Permission` | Catalog of permissions | `Id` (PK, int IDENTITY), `Code` (unique, e.g. `quote.read.own`), `Service`, `Resource`, `Action`, `Scope` (Own/Assigned/Organization/Tenant/Any), `Description` |
+| `RolePermission` | Role-to-permission assignment (many-to-many) | `RoleId` (FK), `PermissionId` (FK), composite PK `{RoleId, PermissionId}` |
+| `UserRole` | User-to-role assignment (many-to-many) | `UserId` (FK to `UserIdentity`), `RoleId` (FK to `Role`), `AssignedAt`, `AssignedBy`, composite PK `{UserId, RoleId}` |
+
+Relationships:
+- `Role` 1 ── * `RolePermission` * ── 1 `Permission`
+- `UserIdentity` 1 ── * `UserRole` * ── 1 `Role`
+- A user's effective permissions are the distinct union of `Permission` rows reached through their `UserRole` → `RolePermission` assignments.
+
+Notes:
+- `UserRole.RoleId` references `Role.Id`; the current `RoleName` string column is replaced by this foreign key.
+- `Permission.Code` is the value emitted in the JWT `permission` claim.
+- Seed data for `Role`, `Permission`, and `RolePermission` comes from the matrix in Roles & Permissions. Seeding runs as a migration step so the database and the matrix stay in sync.
+- Role and permission rows are not edited at runtime through the API; changes go through migrations.
+- Deleting a role or permission is blocked while assignments exist.
 
 ### Entity Relationships
 
@@ -661,6 +945,7 @@ public IActionResult AdminOnlyAction()
 ### Migrations Strategy
 - Code-first approach using EF Core migrations
 - Initial migration: `20260618224016_InitialCreate`
+- Role and permission migration: `AddRolesGuestAndProfile` (creates `UserRole`; will be replaced by the `Role`, `Permission`, `UserRole`, and `RolePermission` schema described under Data Model)
 - Run migrations: `Update-Database` (Package Manager Console)
 - Migrations stored in `Persistence/Migrations/` directory
 
@@ -1493,6 +1778,8 @@ Tests should run as part of CI/CD pipeline:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.3 | 2025 | Added Guest quote creation, Guest-to-Registered conversion, and CurrentUserContext design |
+| 1.2 | 2025 | Added Roles & Permissions design (7 roles, 6 services, scoped permission model) |
 | 1.1 | 2025 | Added comprehensive unit testing infrastructure documentation (40 tests for AuthController) |
 | 1.0 | 2025 | Initial architecture documentation |
 

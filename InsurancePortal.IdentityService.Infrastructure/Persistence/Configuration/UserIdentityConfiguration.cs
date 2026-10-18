@@ -35,7 +35,32 @@ namespace InsurancePortal.IdentityService.Infrastructure.Persistence.Configurati
                 .IsRequired()
                 .HasDefaultValue(false);
 
+            builder.Property(x => x.OrganizationId)
+                .HasColumnName("OrganizationId");
+
+            builder.Property(x => x.Username)
+                .HasColumnName("Username")
+                .HasMaxLength(100);
+
+            builder.Property(x => x.FirstName)
+                .HasColumnName("FirstName")
+                .HasMaxLength(100);
+
+            builder.Property(x => x.LastName)
+                .HasColumnName("LastName")
+                .HasMaxLength(100);
+
+            builder.Property(x => x.IsGuest)
+                .HasColumnName("IsGuest")
+                .IsRequired()
+                .HasDefaultValue(false);
+
             // Relationships
+            builder.HasMany(x => x.Roles)
+                .WithOne(x => x.User)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasMany(x => x.Credentials)
                 .WithOne(x => x.User)
                 .HasForeignKey(x => x.UserId)

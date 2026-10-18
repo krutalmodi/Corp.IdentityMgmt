@@ -13,5 +13,9 @@ namespace InsurancePortal.IdentityService.Application.Interfaces
 
         Task<ExternalIdentity?> GetExternalIdentityByProviderAsync(Guid userId, string provider);
         Task AddExternalIdentityAsync(ExternalIdentity externalIdentity);
+
+        Task<Role> GetRoleByNameAsync(string roleName);
+
+        Task SaveChangesAsync();
     }
 }

@@ -1,8 +1,10 @@
 ﻿using InsurancePortal.IdentityService.Application.Dtos;
 using InsurancePortal.IdentityService.Application.DTOs;
-using InsurancePortal.IdentityService.Application.Handlers;
+using InsurancePortal.IdentityService.Application.Commands;
 using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Application.Queries;
 using InsurancePortal.IdentityService.Infrastructure.ExternalProviders;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InsurancePortal.IdentityService.Api.Controllers
@@ -41,6 +43,65 @@ namespace InsurancePortal.IdentityService.Api.Controllers
         }
 
         /// <summary>
+        /// Converts the authenticated Guest account into a Registered account and returns a new token.
+        /// </summary>
+        [HttpPost("convert-guest")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> ConvertGuest([FromBody] ConvertGuestDto dto, [FromServices] ICurrentUserContext currentUserContext)
+        {
+            var current = currentUserContext.Current;
+            if (current == null)
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                var command = new ConvertGuestCommand(_userRepository, _tokenService);
+                var token = await command.ConvertAsync(current.UserId, dto);
+                return Ok(new { token });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Returns the profile of the authenticated user.
+        /// </summary>
+        [HttpGet("me")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetCurrentUser([FromServices] ICurrentUserContext currentUserContext, [FromServices] IUserQueries userQueries)
+        {
+            var current = currentUserContext.Current;
+            if (current == null)
+            {
+                return Unauthorized();
+            }
+
+            var profile = await new GetCurrentUserQuery(userQueries).HandleAsync(current.UserId);
+            return profile == null ? NotFound() : Ok(profile);
+        }
+
+        /// <summary>
+        /// Returns the role names assigned to the authenticated user.
+        /// </summary>
+        [HttpGet("me/roles")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetUserRoles([FromServices] ICurrentUserContext currentUserContext, [FromServices] IUserQueries userQueries)
+        {
+            var current = currentUserContext.Current;
+            if (current == null)
+            {
+                return Unauthorized();
+            }
+
+            var roles = await new GetUserRolesQuery(userQueries).HandleAsync(current.UserId);
+            return Ok(new { roles });
+        }
+
+        /// <summary>
         /// Registers a new user with the provided registration information.
         /// </summary>
         [HttpPost("register")]
@@ -49,8 +110,8 @@ namespace InsurancePortal.IdentityService.Api.Controllers
             try
             {
                 Guid tenantId = ResolveTenantId();
-                var handler = new RegisterUserHandler(_userRepository, _passwordHasher);
-                await handler.RegisterAsync(dto, tenantId);
+                var command = new RegisterUserCommand(_userRepository, _passwordHasher);
+                await command.RegisterAsync(dto, tenantId);
                 return Ok(new RegisterResponseDto("User registered successfully."));
             }
             catch (InvalidOperationException ex)
@@ -72,8 +133,8 @@ namespace InsurancePortal.IdentityService.Api.Controllers
             try
             {
                 Guid tenantId = ResolveTenantId();
-                var handler = new LoginHandler(_userRepository, _passwordHasher, _tokenService);
-                var token = await handler.LoginAsync(dto, tenantId);
+                var command = new LoginCommand(_userRepository, _passwordHasher, _tokenService);
+                var token = await command.LoginAsync(dto, tenantId);
                 return Ok(new { token });
             }
             catch (UnauthorizedAccessException ex)
@@ -176,8 +237,8 @@ namespace InsurancePortal.IdentityService.Api.Controllers
                 }
 
                 // Handle the external login
-                var handler = new ExternalAuthHandler(_userRepository, _tokenService);
-                var result = await handler.HandleExternalLoginAsync(externalUserInfo, tenantId, provider);
+                var command = new ExternalAuthCommand(_userRepository, _tokenService);
+                var result = await command.HandleExternalLoginAsync(externalUserInfo, tenantId, provider);
 
                 if (result.Token == null)
                 {

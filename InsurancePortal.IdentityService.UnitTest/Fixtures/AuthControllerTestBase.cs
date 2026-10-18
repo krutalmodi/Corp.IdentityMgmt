@@ -1,6 +1,7 @@
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Domain.Entities;
 using InsurancePortal.IdentityService.Infrastructure.ExternalProviders;
 using Microsoft.Extensions.Configuration;
 using Xunit;
@@ -30,7 +31,10 @@ namespace InsurancePortal.IdentityService.UnitTest.Fixtures
             MockHttpClientFactory = new Mock<IHttpClientFactory>();
             MockConfiguration = new Mock<IConfiguration>();
 
-            // Create HttpClient mocks for OAuth providers (they expect HttpClient, not IHttpClientFactory)
+            MockUserRepository.Setup(ur => ur.GetRoleByNameAsync(It.IsAny<string>()))
+                .ReturnsAsync((string roleName) => new Role { Id = 2, Name = roleName, Type = "External" });
+
+            // Create HttpClient mocks
             var mockHttpClientGoogle = new Mock<HttpClient>();
             var mockHttpClientGitHub = new Mock<HttpClient>();
             var mockHttpClientMicrosoft = new Mock<HttpClient>();

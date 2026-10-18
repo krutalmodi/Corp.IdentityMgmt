@@ -22,16 +22,32 @@ namespace InsurancePortal.IdentityService.Infrastructure.Persistence
 
         #region UserRepository Implementation
 
-        public Task<UserIdentity?> GetUserByIdAsync(Guid userId) => _context.User.FindAsync(userId).AsTask();
+        public Task<UserIdentity?> GetUserByIdAsync(Guid userId) =>
+            _context.User
+                .Include(x => x.Roles)
+                    .ThenInclude(x => x.Role)
+                        .ThenInclude(x => x.RolePermissions)
+                            .ThenInclude(x => x.Permission)
+                .FirstOrDefaultAsync(x => x.Id == userId);
 
         public Task<UserIdentity?> GetUserByEmailAsync(Guid tenantId, string email) => 
-            _context.User.FirstOrDefaultAsync(x => x.Email == email && x.TenantId == tenantId);
+            _context.User
+                .Include(x => x.Roles)
+                    .ThenInclude(x => x.Role)
+                        .ThenInclude(x => x.RolePermissions)
+                            .ThenInclude(x => x.Permission)
+                .FirstOrDefaultAsync(x => x.Email == email && x.TenantId == tenantId);
 
         public async Task AddUserAsync(UserIdentity user)
         {
             _context.User.Add(user);
             await _context.SaveChangesAsync();
         }
+
+        public Task<Role> GetRoleByNameAsync(string roleName) =>
+            _context.Role.FirstAsync(x => x.Name == roleName);
+
+        public Task SaveChangesAsync() => _context.SaveChangesAsync();
 
         #endregion
 

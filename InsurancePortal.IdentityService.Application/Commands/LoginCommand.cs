@@ -1,18 +1,15 @@
-﻿using InsurancePortal.IdentityService.Application.DTOs;
+using InsurancePortal.IdentityService.Application.DTOs;
 using InsurancePortal.IdentityService.Application.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace InsurancePortal.IdentityService.Application.Handlers
+namespace InsurancePortal.IdentityService.Application.Commands
 {
-    public class LoginHandler
+    public class LoginCommand
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ITokenService _tokenService;
 
-        public LoginHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, ITokenService tokenService)
+        public LoginCommand(IUserRepository userRepository, IPasswordHasher passwordHasher, ITokenService tokenService)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;

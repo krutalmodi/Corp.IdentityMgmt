@@ -1,15 +1,16 @@
-﻿using InsurancePortal.IdentityService.Application.DTOs;
+using InsurancePortal.IdentityService.Application.DTOs;
 using InsurancePortal.IdentityService.Application.Interfaces;
+using InsurancePortal.IdentityService.Domain.Authorization;
 using InsurancePortal.IdentityService.Domain.Entities;
 
-namespace InsurancePortal.IdentityService.Application.Handlers
+namespace InsurancePortal.IdentityService.Application.Commands
 {
-    public class RegisterUserHandler
+    public class RegisterUserCommand
     {
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
 
-        public RegisterUserHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
+        public RegisterUserCommand(IUserRepository userRepository, IPasswordHasher passwordHasher)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
@@ -25,6 +26,7 @@ namespace InsurancePortal.IdentityService.Application.Handlers
 
             // 2. Create user
             var user = new UserIdentity(tenantId, dto.Email);
+            user.AssignRole(await _userRepository.GetRoleByNameAsync(Roles.Registered));
             await _userRepository.AddUserAsync(user);
 
             // 3. Hash password
